@@ -27,4 +27,10 @@ public class User {
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
     private List<Post> posts;
+
+    @ManyToMany(mappedBy = "likes") // ManyToMany with likedBy field in Post
+    private List<Post> likedPosts;
+
+    @ManyToMany(mappedBy = "saves") // ManyToMany with savedBy field in Post
+    private List<Post> savedPosts;
 }

@@ -1,7 +1,6 @@
 package com.bytebard.sharespace.services.impl;
 
 import com.bytebard.sharespace.exceptions.AlreadyExistsException;
-import com.bytebard.sharespace.mappers.UserMapper;
 import com.bytebard.sharespace.models.User;
 import com.bytebard.sharespace.repository.UserRepository;
 import com.bytebard.sharespace.services.UserService;
@@ -19,12 +18,9 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private UserMapper userMapper;
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userMapper = userMapper;
     }
 
     public User findByUsername(String username) throws UsernameNotFoundException {

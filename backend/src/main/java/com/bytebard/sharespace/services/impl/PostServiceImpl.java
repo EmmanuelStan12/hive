@@ -5,14 +5,12 @@ import com.bytebard.sharespace.dtos.post.PostDTORequest;
 import com.bytebard.sharespace.dtos.post.PostDTO;
 import com.bytebard.sharespace.exceptions.NotFoundException;
 import com.bytebard.sharespace.files.FileUploadHelper;
-import com.bytebard.sharespace.mappers.PostMapper;
-import com.bytebard.sharespace.mappers.UserMapper;
+import com.bytebard.sharespace.mappers.MapperUtils;
 import com.bytebard.sharespace.models.Post;
 import com.bytebard.sharespace.models.User;
 import com.bytebard.sharespace.repository.PostRepository;
 import com.bytebard.sharespace.services.PostService;
 import javafx.util.Pair;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,22 +25,18 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final PostMapper postMapper;
     private final FileUploadHelper fileUploadHelper;
-    private final UserMapper userMapper;
 
-    public PostServiceImpl(PostRepository postRepository, PostMapper postMapper, FileUploadHelper fileUploadHelper, UserMapper userMapper) {
+    public PostServiceImpl(PostRepository postRepository, FileUploadHelper fileUploadHelper) {
         this.postRepository = postRepository;
-        this.postMapper = postMapper;
         this.fileUploadHelper = fileUploadHelper;
-        this.userMapper = userMapper;
     }
 
     @Override
     public PostDTO createPost(PostDTORequest createPostDTO, MultipartFile file) throws IOException {
         Pair<String, String> fileProps = fileUploadHelper.upload(file);
 
-        Post post = postMapper.convertToModel(createPostDTO);
+        Post post = MapperUtils.toPost(createPostDTO);
 
         post.setImageId(fileProps.getKey());
         post.setImageUrl(fileProps.getValue());
@@ -50,13 +44,13 @@ public class PostServiceImpl implements PostService {
         post.setCreator(currentUser());
 
         post = postRepository.save(post);
-        return postMapper.convertToDTO(post);
+        return MapperUtils.toPostDTO(post, true, true);
     }
 
     @Override
     public PostDTO getPostById(Long id) throws NotFoundException {
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
-        return postMapper.convertToDTO(post);
+        return MapperUtils.toPostDTO(post, true, true);
     }
 
     @Override
@@ -72,7 +66,7 @@ public class PostServiceImpl implements PostService {
     public PostDTO updatePost(Long id, PostDTORequest updatePostDTO, MultipartFile file) throws IOException, NotFoundException {
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
 
-        Post updatedPost = postMapper.convertToModel(updatePostDTO);
+        Post updatedPost = MapperUtils.toPost(updatePostDTO);
         updatedPost.setId(post.getId());
 
         if (file != null) {
@@ -84,7 +78,7 @@ public class PostServiceImpl implements PostService {
 
             updatedPost = postRepository.save(post);
         }
-        return postMapper.convertToDTO(updatedPost);
+        return MapperUtils.toPostDTO(updatedPost);
     }
 
     @Override
@@ -92,7 +86,21 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(page - 1, perPage, Sort.by("createdAt"));
         List<Post> posts = postRepository.findAll(searchValue, pageable);
 
-        return posts.stream().map(postMapper::convertToDTO).toList();
+        return posts.stream().map(post -> MapperUtils.toPostDTO(post, true, true)).toList();
+    }
+
+    @Override
+    public List<PostDTO> getLikedPosts() {
+        List<Post> posts = postRepository.findSavedPosts(currentUser().getId());
+
+        return posts.stream().map(MapperUtils::toPostDTO).toList();
+    }
+
+    @Override
+    public List<PostDTO> getSavedPosts() {
+        List<Post> posts = postRepository.findLikedPosts(currentUser().getId());
+
+        return posts.stream().map(MapperUtils::toPostDTO).toList();
     }
 
     private User currentUser() {

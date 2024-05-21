@@ -7,7 +7,6 @@ import com.bytebard.sharespace.dtos.auth.AuthDTO;
 import com.bytebard.sharespace.dtos.auth.CreateUserDTO;
 import com.bytebard.sharespace.dtos.auth.LoginDTO;
 import com.bytebard.sharespace.dtos.auth.UserDTO;
-import com.bytebard.sharespace.mappers.UserMapper;
 import com.bytebard.sharespace.models.User;
 import com.bytebard.sharespace.services.UserService;
 import jakarta.validation.Valid;

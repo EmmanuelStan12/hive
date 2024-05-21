@@ -1,10 +1,12 @@
 package com.bytebard.sharespace.dtos.auth;
 
+import com.bytebard.sharespace.dtos.post.PostDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -19,6 +21,17 @@ public class UserDTO {
     private String username;
     private String imageUrl;
     private String bio;
+    private List<PostDTO> likedPosts;
+    private List<PostDTO> savedPosts;
+
+    public UserDTO(Long id, String name, String email, String username, String imageUrl, String bio) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.username = username;
+        this.imageUrl = imageUrl;
+        this.bio = bio;
+    }
 
     @Override
     public String toString() {

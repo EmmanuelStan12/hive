@@ -20,4 +20,8 @@ public interface PostService {
 
     List<PostDTO> getAllPosts(String searchValue, Integer page, Integer perPage);
 
+    List<PostDTO> getLikedPosts();
+
+    List<PostDTO> getSavedPosts();
+
 }

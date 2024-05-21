@@ -59,11 +59,23 @@ public class PostController {
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, postDTO), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "delete/{id}", consumes = "multipart/form-data")
+    @DeleteMapping(value = "delete/{id}")
     public ResponseEntity<ApiResponse<PostDTO>> deletePost(
             @PathVariable("id") Long postId
     ) throws IOException, NotFoundException {
         postService.deletePostById(postId);
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), "Deleted successfully", null), HttpStatus.OK);
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<ApiResponse<List<PostDTO>>> getSavedPosts() {
+        List<PostDTO> posts = postService.getSavedPosts();
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, posts), HttpStatus.OK);
+    }
+
+    @GetMapping("/liked")
+    public ResponseEntity<ApiResponse<List<PostDTO>>> getLikedPosts() {
+        List<PostDTO> posts = postService.getLikedPosts();
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, posts), HttpStatus.OK);
     }
 }

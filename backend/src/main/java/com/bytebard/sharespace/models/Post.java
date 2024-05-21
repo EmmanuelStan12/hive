@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,6 +37,22 @@ public class Post {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User creator;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_likes",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> likes; // Users who liked this post
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_saves", // Join table for saves
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> saves; // Users who saved this post
 
     @PrePersist
     public void setCreatedAt() {

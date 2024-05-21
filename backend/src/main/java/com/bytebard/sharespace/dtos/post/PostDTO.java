@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,4 +30,19 @@ public class PostDTO {
     private LocalDateTime createdAt;
 
     private UserDTO creator;
+
+    private List<UserDTO> likes;
+
+    private List<UserDTO> saves;
+
+    public PostDTO(long id, String caption, String imageUrl, String imageId, String location, String tags, LocalDateTime createdAt, UserDTO creator) {
+        this.id = id;
+        this.caption = caption;
+        this.imageUrl = imageUrl;
+        this.imageId = imageId;
+        this.location = location;
+        this.tags = tags;
+        this.createdAt = createdAt;
+        this.creator = creator;
+    }
 }

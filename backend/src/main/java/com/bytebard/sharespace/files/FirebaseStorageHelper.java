@@ -17,7 +17,7 @@ import java.nio.file.Files;
 
 public class FirebaseStorageHelper {
 
-    private static final String BUCKET_NAME = "sharespace-43f97.appspot.com";
+    private static final String BUCKET_NAME = "hive-d69c6.appspot.com";
 
     private static final String ADMIN_SDK_PATH = "sharespace-firebase-adminsdk.json";
 
