@@ -1,5 +1,4 @@
 import * as z from "zod";
-import { Models } from "appwrite";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,16 +19,16 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUserContext } from "@/context/AuthContext";
 import { FileUploader, Loader } from "@/components/shared";
 import { useCreatePost, useUpdatePost } from "@/lib/react-query/queries";
+import {IPost} from "@/types";
 
 type PostFormProps = {
-    post?: Models.Document;
+    post?: IPost;
     action: "Create" | "Update";
 };
 
 const PostForm = ({ post, action }: PostFormProps) => {
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { user } = useUserContext();
     const form = useForm<z.infer<typeof PostValidation>>({
         resolver: zodResolver(PostValidation),
         defaultValues: {
@@ -52,7 +51,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
         if (post && action === "Update") {
             const updatedPost = await updatePost({
                 ...value,
-                postId: post.$id
+                postId: post.id
             });
 
             if (!updatedPost) {
@@ -60,7 +59,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
                     title: `${action} post failed. Please try again.`,
                 });
             }
-            return navigate(`/posts/${post.$id}`);
+            return navigate(`/posts/${post.id}`);
         }
 
         // ACTION = CREATE

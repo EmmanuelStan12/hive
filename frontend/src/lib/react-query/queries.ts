@@ -5,7 +5,7 @@ import {
     useInfiniteQuery,
 } from "@tanstack/react-query";
 
-import { QUERY_KEYS } from "@/lib/react-query/queryKeys";
+import {QUERY_KEYS} from "@/lib/react-query/queryKeys";
 import {
     createUserAccount,
     signInAccount,
@@ -24,9 +24,9 @@ import {
     getInfinitePosts,
     searchPosts,
     savePost,
-    deleteSavedPost,
+    deleteSavedPost, getSavedPosts,
 } from "@/lib/services/api";
-import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
+import {INewPost, INewUser, IUpdatePost, IUpdateUser} from "@/types";
 
 // ============================================================
 // AUTH QUERIES
@@ -112,7 +112,7 @@ export const useUpdatePost = () => {
         mutationFn: (post: IUpdatePost) => updatePost(post),
         onSuccess: (data) => {
             queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
+                queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.id],
             });
         },
     });
@@ -121,8 +121,8 @@ export const useUpdatePost = () => {
 export const useDeletePost = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ postId, imageId }: { postId?: string; imageId: string }) =>
-            deletePost(postId, imageId),
+        mutationFn: ({postId}: { postId?: number }) =>
+            deletePost(postId),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
@@ -134,16 +134,14 @@ export const useDeletePost = () => {
 export const useLikePost = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({
-                         postId,
-                         likesArray,
-                     }: {
-            postId: string;
-            likesArray: string[];
-        }) => likePost(postId, likesArray),
+        mutationFn: (
+            { postId }: {
+                postId: number;
+            }
+        ) => likePost(postId),
         onSuccess: (data) => {
             queryClient.invalidateQueries({
-                queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
+                queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.id],
             });
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
@@ -161,8 +159,8 @@ export const useLikePost = () => {
 export const useSavePost = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ userId, postId }: { userId: string; postId: string }) =>
-            savePost(userId, postId),
+        mutationFn: ({ postId } : { postId: number }) =>
+            savePost(postId),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
@@ -203,6 +201,13 @@ export const useGetCurrentUser = () => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
         queryFn: getCurrentUser,
+    });
+};
+
+export const useGetSavedPosts = () => {
+    return useQuery({
+        queryKey: [QUERY_KEYS.GET_SAVED_POSTS],
+        queryFn: getSavedPosts,
     });
 };
 

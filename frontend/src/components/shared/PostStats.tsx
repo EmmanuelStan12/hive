@@ -6,20 +6,20 @@ import {
     useLikePost,
     useSavePost,
     useDeleteSavedPost,
-    useGetCurrentUser,
+    useGetCurrentUser, useGetSavedPosts,
 } from "@/lib/react-query/queries";
 import { IPost, IUser } from "@/types";
 
 type PostStatsProps = {
     post: IPost;
-    userId: string;
+    userId: number;
 };
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
     const location = useLocation();
     const likesList = post.likes.map((user: IUser) => user.id);
 
-    const [likes, setLikes] = useState<string[]>(likesList);
+    const [likes, setLikes] = useState<number[]>(likesList);
     const [isSaved, setIsSaved] = useState(false);
 
     const { mutate: likePost } = useLikePost();
@@ -27,8 +27,9 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     const { mutate: deleteSavePost } = useDeleteSavedPost();
 
     const { data: currentUser } = useGetCurrentUser();
+    const { data: savedPosts } = useGetSavedPosts();
 
-    const savedPostRecord = currentUser
+    const savedPostRecord = savedPosts?.find(record => record.id === post.id)
 
     useEffect(() => {
         setIsSaved(!!savedPostRecord);
@@ -48,7 +49,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
         }
 
         setLikes(likesArray);
-        likePost({ postId: post.id, likesArray });
+        likePost({ postId: post.id });
     };
 
     const handleSavePost = (
@@ -61,7 +62,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
             return deleteSavePost(savedPostRecord.id);
         }
 
-        savePost({ userId: userId, postId: post.id });
+        savePost({ postId: post.id });
         setIsSaved(true);
     };
 

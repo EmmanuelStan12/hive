@@ -53,6 +53,6 @@ export const multiFormatDateString = (timestamp: string = ""): string => {
     }
 };
 
-export const checkIsLiked = (likeList: string[], userId: string) => {
+export const checkIsLiked = (likeList: number[], userId: number) => {
     return likeList.includes(userId);
 };

@@ -199,6 +199,26 @@ export async function getInfinitePosts({ pageParam = 1 }: { pageParam: number })
     }
 }
 
+
+export async function getSavedPosts() {
+    const token = LocalStorage.get("token") as string
+    try {
+        const response = await axios.get(`${BASE_URL}/posts/saved`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        const data = response.data as ApiResponse<IPost[]>
+        console.log(data)
+
+        return data.data
+    } catch (e) {
+        console.log(e)
+        const err = (e as any).response.data as ApiErrorResponse
+        throw err
+    }
+}
+
 // ============================== GET POST BY ID
 export async function getPostById(postId?: string) {
     try {
@@ -254,17 +274,17 @@ export async function updatePost({ tags, caption, file, postId, location }: IUpd
 }
 
 // ============================== DELETE POST
-export async function deletePost(postId?: string, imageId?: string) {
+export async function deletePost(postId?: number) {
     return null
 }
 
 // ============================== LIKE / UNLIKE POST
-export async function likePost(postId: string, likesArray: string[]) {
+export async function likePost(postId: number) {
     return null
 }
 
 // ============================== SAVE POST
-export async function savePost(userId: string, postId: string) {
+export async function savePost(postId: number) {
     return null
 }
 
