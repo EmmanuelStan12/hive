@@ -1,11 +1,13 @@
 package com.bytebard.sharespace.mappers;
 
 import com.bytebard.sharespace.dtos.auth.CreateUserDTO;
+import com.bytebard.sharespace.dtos.auth.UpdateUserDTO;
 import com.bytebard.sharespace.dtos.auth.UserDTO;
 import com.bytebard.sharespace.dtos.post.PostDTO;
 import com.bytebard.sharespace.dtos.post.PostDTORequest;
 import com.bytebard.sharespace.models.Post;
 import com.bytebard.sharespace.models.User;
+import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -13,13 +15,18 @@ import java.util.List;
 public class MapperUtils {
 
     public static PostDTO toPostDTO(Post post, boolean addLikes, boolean addSaves) {
+        String tags = post.getTags();
+        List<String> tagsList = List.of();
+        if (tags != null && !tags.isEmpty()) {
+            tagsList = List.of(tags.split(","));
+        }
         PostDTO postDTO = new PostDTO(
                 post.getId(),
                 post.getCaption(),
                 post.getImageUrl(),
                 post.getImageId(),
                 post.getLocation(),
-                post.getTags(),
+                tagsList,
                 post.getCreatedAt(),
                 toUserDTO(post.getCreator())
         );
@@ -56,7 +63,7 @@ public class MapperUtils {
         );
     }
 
-    public static UserDTO toUserDTO(User user, boolean addLikedPosts, boolean addSavedPosts) {
+    public static UserDTO toUserDTO(User user, boolean addPosts, boolean addFollows) {
         UserDTO userDTO = new UserDTO(
                 user.getId(),
                 user.getName(),
@@ -65,18 +72,31 @@ public class MapperUtils {
                 user.getImageUrl(),
                 user.getBio()
         );
-        if (!addLikedPosts && !addSavedPosts) {
+        if (!addPosts && !addFollows) {
             return userDTO;
         }
 
-        if (addLikedPosts && !CollectionUtils.isEmpty(user.getLikedPosts())) {
+        if (addPosts && !CollectionUtils.isEmpty(user.getLikedPosts())) {
             List<PostDTO> likedPosts = user.getLikedPosts().stream().map(MapperUtils::toPostDTO).toList();
             userDTO.setLikedPosts(likedPosts);
         }
 
-        if (addSavedPosts && !CollectionUtils.isEmpty(user.getSavedPosts())) {
+        if (addPosts && !CollectionUtils.isEmpty(user.getSavedPosts())) {
             List<PostDTO> savedPosts = user.getSavedPosts().stream().map(MapperUtils::toPostDTO).toList();
             userDTO.setSavedPosts(savedPosts);
+        }
+
+        if (addPosts && !CollectionUtils.isEmpty(user.getPosts())) {
+            List<PostDTO> posts = user.getPosts().stream().map(MapperUtils::toPostDTO).toList();
+            userDTO.setPosts(posts);
+        }
+
+        if (addFollows && !CollectionUtils.isEmpty(user.getFollowers())) {
+            userDTO.setFollowers(user.getFollowers().stream().map(MapperUtils::toUserDTO).toList());
+        }
+
+        if (addFollows && !CollectionUtils.isEmpty(user.getFollowing())) {
+            userDTO.setFollowers(user.getFollowing().stream().map(MapperUtils::toUserDTO).toList());
         }
 
         return userDTO;
@@ -97,6 +117,9 @@ public class MapperUtils {
                 dto.getEmail(),
                 dto.getPassword(),
                 dto.getUsername(),
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,

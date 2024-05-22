@@ -8,8 +8,6 @@ export type IUpdateUser = {
     userId: number;
     name: string;
     bio: string;
-    imageId: string;
-    imageUrl: URL | string;
     file: File[];
 };
 
@@ -48,6 +46,7 @@ export type IUser = {
     email: string;
     imageUrl: string;
     bio: string;
+    posts: IPost[]
     savedPosts?: IPost[]
     likedPosts?: IPost[]
 };

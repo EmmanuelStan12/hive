@@ -11,10 +11,12 @@ import { useToast } from "@/components/ui/use-toast";
 
 import { SigninValidation } from "@/lib/validation";
 import { useSignInAccount } from "@/lib/react-query/queries";
+import {useUserContext} from "@/context/AuthContext.tsx";
 
 const SigninForm = () => {
     const { toast } = useToast();
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     // Query
     const { mutateAsync: signInAccount, isLoading } = useSignInAccount();
@@ -37,6 +39,7 @@ const SigninForm = () => {
 
                 return;
             }
+            setUser(signedInUser)
 
             form.reset();
             navigate("/");

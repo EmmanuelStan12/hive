@@ -52,6 +52,9 @@ public class FileUploadHelper {
     }
 
     public void delete(String filename) throws IOException {
+        if (filename == null) {
+            return;
+        }
         try {
             filename = filename.concat(getExtension(filename));
             FirebaseStorageHelper.deleteFile(filename);

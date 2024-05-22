@@ -24,6 +24,16 @@ public class User {
     private String username;
     private String bio;
     private String imageUrl;
+    private String imageId;
+
+    @ManyToMany(mappedBy = "following")
+    private List<User> followers;
+
+    @ManyToMany
+    @JoinTable(name = "user_following", // Join table for followers
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "following_id"))
+    private List<User> following;
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
     private List<Post> posts;

@@ -18,10 +18,20 @@ public interface PostService {
 
     PostDTO updatePost(Long id, PostDTORequest updatePostDTO, MultipartFile file) throws IOException, NotFoundException;
 
-    List<PostDTO> getAllPosts(String searchValue, Integer page, Integer perPage);
+    List<PostDTO> getAllPosts(String searchValue, Integer userId, Integer page, Integer perPage);
+
+    List<PostDTO> getRecentPosts();
 
     List<PostDTO> getLikedPosts();
 
     List<PostDTO> getSavedPosts();
+
+    void deleteSavedPost(Long postId) throws NotFoundException;
+
+    void deleteLikedPost(Long postId) throws NotFoundException;
+
+    PostDTO likePost(Long postId) throws NotFoundException;
+
+    PostDTO savePost(Long postId) throws NotFoundException;
 
 }

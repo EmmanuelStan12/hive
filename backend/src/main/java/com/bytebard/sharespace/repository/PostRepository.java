@@ -16,8 +16,14 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("SELECT p FROM Post p")
+    @Query("SELECT p FROM Post p WHERE p.tags LIKE CONCAT('%', :searchValue, '%') OR p.location LIKE CONCAT('%', :searchValue, '%') OR p.caption LIKE CONCAT('%', :searchValue, '%') ORDER BY p.createdAt")
     List<Post> findAll(@Param("searchValue") String searchValue, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.creator.id = :userId AND (p.tags LIKE CONCAT('%', :searchValue, '%') OR p.location LIKE CONCAT('%', :searchValue, '%') OR p.caption LIKE CONCAT('%', :searchValue, '%')) ORDER BY p.createdAt")
+    List<Post> findAllByUserId(@Param("searchValue") String searchValue, @Param("userId") Integer userId, Pageable pageable);
+
+    @Query(value = "SELECT p.* FROM posts p INNER JOIN user_likes ul ON p.id = ul.post_id GROUP BY p.id ORDER BY COUNT(ul.post_id) DESC", nativeQuery = true)
+    List<Post> findPopularPosts();
 
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.saves s WHERE s.id = :userId")
     List<Post> findSavedPosts(@Param("userId") Long userId);

@@ -70,12 +70,13 @@ export async function createUserAccount(user: INewUser) {
         const response = await axios.post(`${BASE_URL}/auth/signup`, user)
         const data = response.data as ApiResponse<{ user: IUser, token: string }>
         console.log(data)
-        const { user, token } = data.data
+        const { user: newUser, token } = data.data
 
-        setAuthLocalStorageProps(user, token)
+        setAuthLocalStorageProps(newUser, token)
 
-        return user
+        return newUser
     } catch (e) {
+        console.log(e)
         const err = (e as any).response.data as ApiErrorResponse
         throw err
     }
@@ -88,11 +89,11 @@ export async function signInAccount(signInUser: { email: string; password: strin
         const data = response.data as ApiResponse<{ user: IUser, token: string }>
 
         console.log(data)
-        const { user, token } = data.data
+        const { user: signedInUser, token } = data.data
 
-        setAuthLocalStorageProps(user, token)
+        setAuthLocalStorageProps(signedInUser, token)
 
-        return user
+        return signedInUser
     } catch (e) {
         console.log(e)
         const err = (e as any).response.data as ApiErrorResponse
@@ -100,23 +101,24 @@ export async function signInAccount(signInUser: { email: string; password: strin
     }
 }
 
-// ============================== GET ACCOUNT
-export async function getAccount() {
-    return null
-}
-
 // ============================== GET USER
 export async function getCurrentUser() {
-    const user = LocalStorage.get("user") as IUser
-    if (!user) {
-        return null
+    try {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.get(`${BASE_URL}/users/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        const post = response.data as ApiResponse<IUser>
+
+        return post.data
+    } catch (e) {
+        console.log(e)
+        const err = (e as any).response.data as ApiErrorResponse
+        throw err
     }
-    const token = LocalStorage.get("token") as string
-    if (!isTokenExpired(token)) {
-        return user
-    }
-    LocalStorage.clear()
-    return null
 }
 
 // ============================== SIGN OUT
@@ -280,27 +282,91 @@ export async function deletePost(postId?: number) {
 
 // ============================== LIKE / UNLIKE POST
 export async function likePost(postId: number) {
-    return null
+    try {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.post(`${BASE_URL}/posts/like/${postId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+
+        const post = response.data as ApiResponse<IPost>
+
+        return post.data
+    } catch (e) {
+        console.log(e)
+        const err = (e as any).response.data as ApiErrorResponse
+        throw err
+    }
 }
 
 // ============================== SAVE POST
 export async function savePost(postId: number) {
-    return null
+    try {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.post(`${BASE_URL}/posts/save/${postId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+
+        const post = response.data as ApiResponse<IPost>
+
+        return post.data
+    } catch (e) {
+        console.log(e)
+        const err = (e as any).response.data as ApiErrorResponse
+        throw err
+    }
 }
 
 // ============================== DELETE SAVED POST
 export async function deleteSavedPost(savedRecordId: string) {
-    return null
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.delete(`${BASE_URL}/posts/save/${savedRecordId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+
+        return response.data
+    })
 }
 
 // ============================== GET USER'S POST
 export async function getUserPosts(userId?: string) {
-    return null
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.get(`${BASE_URL}/posts?userId=${userId}page=1&perPage=100`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        const post = response.data as ApiResponse<IPost>
+
+        return post.data
+    })
 }
 
 // ============================== GET POPULAR POSTS (BY HIGHEST LIKE COUNT)
 export async function getRecentPosts() {
-    return null
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.get(`${BASE_URL}/posts/recent`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        const post = response.data as ApiResponse<IPost[]>
+
+        return post.data
+    })
 }
 
 // ============================================================
@@ -309,15 +375,73 @@ export async function getRecentPosts() {
 
 // ============================== GET USERS
 export async function getUsers(limit?: number) {
-    return null
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.get(`${BASE_URL}/users?page=1&perPage=${limit || 20}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        const post = response.data as ApiResponse<IPost>
+
+        return post.data
+    })
 }
 
 // ============================== GET USER BY ID
 export async function getUserById(userId: string) {
-    return null
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.get(`${BASE_URL}/users/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+        const post = response.data as ApiResponse<IUser>
+
+        return post.data
+    })
 }
 
 // ============================== UPDATE USER
-export async function updateUser(user: IUpdateUser) {
-    return null
+export async function updateUser({ userId, file, name, bio }: IUpdateUser) {
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const form = new FormData();
+        const json = JSON.stringify({ name, bio })
+        const user = new Blob([json], {
+            type: 'application/json'
+        })
+        if (file) {
+            form.set("file", file[0])
+        }
+        form.set("user", user)
+
+        const response = await axios.post(`${BASE_URL}/users/update/${userId}`, form, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": 'multipart/form-data'
+            },
+        })
+        const data = response.data as ApiResponse<IPost>
+
+        console.log(data)
+
+        return data.data
+    })
+}
+
+const withTryCatch = async (
+    fn: any,
+) => {
+    try {
+        return await fn()
+    } catch (e) {
+        console.log(e)
+        const err = (e as any).response.data as ApiErrorResponse
+        throw err
+    }
 }

@@ -19,7 +19,7 @@ public class FirebaseStorageHelper {
 
     private static final String BUCKET_NAME = "hive-d69c6.appspot.com";
 
-    private static final String ADMIN_SDK_PATH = "sharespace-firebase-adminsdk.json";
+    private static final String ADMIN_SDK_PATH = "hive.json";
 
     private static final String MEDIA_TYPE = "media";
 

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,8 +26,9 @@ public class PostDTO {
 
     private String location;
 
-    private String tags;
+    private List<String> tags;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
 
     private UserDTO creator;
@@ -35,7 +37,7 @@ public class PostDTO {
 
     private List<UserDTO> saves;
 
-    public PostDTO(long id, String caption, String imageUrl, String imageId, String location, String tags, LocalDateTime createdAt, UserDTO creator) {
+    public PostDTO(long id, String caption, String imageUrl, String imageId, String location, List<String> tags, LocalDateTime createdAt, UserDTO creator) {
         this.id = id;
         this.caption = caption;
         this.imageUrl = imageUrl;

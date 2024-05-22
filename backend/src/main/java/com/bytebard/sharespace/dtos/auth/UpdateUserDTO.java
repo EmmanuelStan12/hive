@@ -12,17 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CreateUserDTO {
+public class UpdateUserDTO {
 
     @NotEmpty(message = "Name cannot be empty")
     private String name;
 
-    @ValidEmail
-    private String email;
-
-    @ValidPassword
-    private String password;
-
-    @NotEmpty(message = "Username cannot be empty")
-    private String username;
+    private String bio;
 }

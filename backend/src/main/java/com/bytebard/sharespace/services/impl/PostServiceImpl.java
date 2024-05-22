@@ -10,6 +10,7 @@ import com.bytebard.sharespace.models.Post;
 import com.bytebard.sharespace.models.User;
 import com.bytebard.sharespace.repository.PostRepository;
 import com.bytebard.sharespace.services.PostService;
+import com.bytebard.sharespace.services.UserService;
 import javafx.util.Pair;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +27,12 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final FileUploadHelper fileUploadHelper;
+    private final UserService userService;
 
-    public PostServiceImpl(PostRepository postRepository, FileUploadHelper fileUploadHelper) {
+    public PostServiceImpl(PostRepository postRepository, FileUploadHelper fileUploadHelper, UserService userService) {
         this.postRepository = postRepository;
         this.fileUploadHelper = fileUploadHelper;
+        this.userService = userService;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class PostServiceImpl implements PostService {
         post.setImageId(fileProps.getKey());
         post.setImageUrl(fileProps.getValue());
 
-        post.setCreator(currentUser());
+        post.setCreator(userService.getCurrentUser());
 
         post = postRepository.save(post);
         return MapperUtils.toPostDTO(post, true, true);
@@ -82,29 +85,80 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> getAllPosts(String searchValue, Integer page, Integer perPage) {
+    public List<PostDTO> getAllPosts(String searchValue, Integer userId, Integer page, Integer perPage) {
         Pageable pageable = PageRequest.of(page - 1, perPage, Sort.by("createdAt"));
-        List<Post> posts = postRepository.findAll(searchValue, pageable);
+        List<Post> posts;
+        if (userId != null) {
+            posts = postRepository.findAllByUserId(searchValue, userId, pageable);
+        } else {
+            posts = postRepository.findAll(searchValue, pageable);
+        }
+
+        return posts.stream().map(post -> MapperUtils.toPostDTO(post, true, true)).toList();
+    }
+
+    @Override
+    public List<PostDTO> getRecentPosts() {
+        List<Post> posts = postRepository.findPopularPosts();
 
         return posts.stream().map(post -> MapperUtils.toPostDTO(post, true, true)).toList();
     }
 
     @Override
     public List<PostDTO> getLikedPosts() {
-        List<Post> posts = postRepository.findSavedPosts(currentUser().getId());
+        List<Post> posts = postRepository.findSavedPosts(userService.getCurrentUser().getId());
 
         return posts.stream().map(MapperUtils::toPostDTO).toList();
     }
 
     @Override
     public List<PostDTO> getSavedPosts() {
-        List<Post> posts = postRepository.findLikedPosts(currentUser().getId());
+        List<Post> posts = postRepository.findLikedPosts(userService.getCurrentUser().getId());
 
         return posts.stream().map(MapperUtils::toPostDTO).toList();
     }
 
-    private User currentUser() {
-        JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        return (User) authentication.getPrincipal();
+    @Override
+    public void deleteSavedPost(Long postId) throws NotFoundException {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+
+        if (!post.getSaves().contains(userService.getCurrentUser())) {
+            throw new IllegalArgumentException("You are not allowed to remove this saved post");
+        }
+
+        post.getSaves().remove(userService.getCurrentUser());
+        postRepository.save(post);
+    }
+
+    @Override
+    public void deleteLikedPost(Long postId) throws NotFoundException {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+
+        if (!post.getLikes().contains(userService.getCurrentUser())) {
+            throw new IllegalArgumentException("You are not allowed to unlike the post");
+        }
+
+        post.getLikes().remove(userService.getCurrentUser());
+        postRepository.save(post);
+    }
+
+    @Override
+    public PostDTO likePost(Long postId) throws NotFoundException {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+
+        post.getLikes().add(userService.getCurrentUser());
+        post = postRepository.save(post);
+
+        return MapperUtils.toPostDTO(post, true, true);
+    }
+
+    @Override
+    public PostDTO savePost(Long postId) throws NotFoundException {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+
+        post.getSaves().add(userService.getCurrentUser());
+        post = postRepository.save(post);
+
+        return MapperUtils.toPostDTO(post, true, true);
     }
 }

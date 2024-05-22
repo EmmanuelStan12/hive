@@ -11,10 +11,12 @@ import { useToast } from "@/components/ui/use-toast";
 
 import { useCreateUserAccount } from "@/lib/react-query/queries";
 import { SignupValidation } from "@/lib/validation";
+import {useUserContext} from "@/context/AuthContext.tsx";
 
 const SignupForm = () => {
     const { toast } = useToast();
     const navigate = useNavigate();
+    const { setUser } = useUserContext()
 
     const form = useForm<z.infer<typeof SignupValidation>>({
         resolver: zodResolver(SignupValidation),
@@ -39,6 +41,8 @@ const SignupForm = () => {
 
                 return;
             }
+
+            setUser(newUser)
 
             form.reset();
             navigate("/");

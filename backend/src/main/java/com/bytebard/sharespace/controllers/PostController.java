@@ -41,11 +41,18 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<PostDTO>>> getAllPosts(
-            @RequestParam(value = "searchValue", defaultValue = "") String searchValue,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "perPage", defaultValue = "20") int perPage
+            @RequestParam(value = "searchValue", defaultValue = "", required = false) String searchValue,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "perPage", defaultValue = "20", required = false) int perPage,
+            @RequestParam(value = "userId", required = false) Integer userId
     ) throws IOException {
-        List<PostDTO> posts = postService.getAllPosts(searchValue, page, perPage);
+        List<PostDTO> posts = postService.getAllPosts(searchValue, userId, page, perPage);
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, posts), HttpStatus.OK);
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<ApiResponse<List<PostDTO>>> getRecentPosts() throws IOException {
+        List<PostDTO> posts = postService.getRecentPosts();
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, posts), HttpStatus.OK);
     }
 
@@ -77,5 +84,29 @@ public class PostController {
     public ResponseEntity<ApiResponse<List<PostDTO>>> getLikedPosts() {
         List<PostDTO> posts = postService.getLikedPosts();
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, posts), HttpStatus.OK);
+    }
+
+    @PostMapping("/like/{id}")
+    public ResponseEntity<ApiResponse<PostDTO>> likePost(@PathVariable("id") Long postId) throws NotFoundException {
+        PostDTO postDTO = postService.likePost(postId);
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, postDTO), HttpStatus.OK);
+    }
+
+    @PostMapping("/save/{id}")
+    public ResponseEntity<ApiResponse<PostDTO>> savePost(@PathVariable("id") Long postId) throws NotFoundException {
+        PostDTO postDTO = postService.savePost(postId);
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, postDTO), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/save/{id}")
+    public ResponseEntity<ApiResponse<PostDTO>> deleteSavedPost(@PathVariable("id") Long postId) throws NotFoundException {
+        postService.deleteSavedPost(postId);
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, null), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/like/{id}")
+    public ResponseEntity<ApiResponse<PostDTO>> deleteLikedPost(@PathVariable("id") Long postId) throws NotFoundException {
+        postService.deleteLikedPost(postId);
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, null), HttpStatus.OK);
     }
 }

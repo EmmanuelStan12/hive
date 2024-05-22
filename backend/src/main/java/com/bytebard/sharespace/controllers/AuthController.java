@@ -7,6 +7,7 @@ import com.bytebard.sharespace.dtos.auth.AuthDTO;
 import com.bytebard.sharespace.dtos.auth.CreateUserDTO;
 import com.bytebard.sharespace.dtos.auth.LoginDTO;
 import com.bytebard.sharespace.dtos.auth.UserDTO;
+import com.bytebard.sharespace.mappers.MapperUtils;
 import com.bytebard.sharespace.models.User;
 import com.bytebard.sharespace.services.UserService;
 import jakarta.validation.Valid;
@@ -24,12 +25,9 @@ public class AuthController {
 
     private final JwtAuthenticationTokenProvider authenticationProvider;
 
-    private final UserMapper userMapper;
-
-    public AuthController(final UserService userService, JwtAuthenticationTokenProvider authenticationProvider, UserMapper userMapper) {
+    public AuthController(final UserService userService, JwtAuthenticationTokenProvider authenticationProvider) {
         this.userService = userService;
         this.authenticationProvider = authenticationProvider;
-        this.userMapper = userMapper;
     }
 
     @PostMapping("login")
@@ -41,7 +39,7 @@ public class AuthController {
 
     @PostMapping("signup")
     public ResponseEntity<ApiResponse<AuthDTO>> signup(@Valid  @RequestBody CreateUserDTO createUserDTO) throws Exception {
-        User user = userMapper.convertToModel(createUserDTO);
+        User user = MapperUtils.toUser(createUserDTO);
         user = userService.register(user);
         authenticationProvider.verifyUser(user);
         AuthDTO response = generateAuthResponse(user);
@@ -52,12 +50,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserDTO>> me() throws Exception {
         JwtAuthenticationToken authenticationToken = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authenticationToken.getPrincipal();
-        UserDTO userDTO = userMapper.convertToDTO(user);
+        UserDTO userDTO = MapperUtils.toUserDTO(user);
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, userDTO), HttpStatus.OK);
     }
 
     private AuthDTO generateAuthResponse(User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return new AuthDTO(userMapper.convertToDTO(user), authentication.getCredentials().toString());
+        return new AuthDTO(MapperUtils.toUserDTO(user), authentication.getCredentials().toString());
     }
 }

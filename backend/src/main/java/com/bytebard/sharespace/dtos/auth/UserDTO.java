@@ -21,8 +21,11 @@ public class UserDTO {
     private String username;
     private String imageUrl;
     private String bio;
+    private List<PostDTO> posts;
     private List<PostDTO> likedPosts;
     private List<PostDTO> savedPosts;
+    private List<UserDTO> followers;
+    private List<UserDTO> following;
 
     public UserDTO(Long id, String name, String email, String username, String imageUrl, String bio) {
         this.id = id;
