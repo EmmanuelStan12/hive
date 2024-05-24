@@ -68,7 +68,7 @@ const SigninForm = () => {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="shad-form_label">Username/Email</FormLabel>
+                                <FormLabel className="shad-form_label">Email</FormLabel>
                                 <FormControl>
                                     <Input type="text" className="shad-input" {...field} />
                                 </FormControl>

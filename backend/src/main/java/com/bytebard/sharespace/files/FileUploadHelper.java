@@ -38,8 +38,8 @@ public class FileUploadHelper {
 
             File file = convertToFile(multipartFile, filename);
             String fileUrl = FirebaseStorageHelper.uploadFile(file, filename);
-            Pair<String, String> fileProps = new Pair<>(uuid, fileUrl);
-            boolean isDeleted = file.delete();
+            Pair<String, String> fileProps = new Pair<>(filename, fileUrl);
+            file.delete();
             return fileProps;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -52,7 +52,7 @@ public class FileUploadHelper {
     }
 
     public void delete(String filename) throws IOException {
-        if (filename == null) {
+        if (filename == null || !FirebaseStorageHelper.exists(filename)) {
             return;
         }
         try {

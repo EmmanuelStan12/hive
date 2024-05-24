@@ -53,7 +53,6 @@ const UpdateProfile = () => {
             userId: currentUser.id,
             name: value.name,
             bio: value.bio,
-            bio: value.bio,
             file: value.file
         });
 

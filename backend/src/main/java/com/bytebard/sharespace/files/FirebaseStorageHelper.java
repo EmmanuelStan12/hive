@@ -2,10 +2,7 @@ package com.bytebard.sharespace.files;
 
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +11,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.concurrent.Future;
 
 public class FirebaseStorageHelper {
 
@@ -54,5 +52,10 @@ public class FirebaseStorageHelper {
     public static boolean deleteFile(String fileName) throws IOException {
         BlobId blobId = BlobId.of(BUCKET_NAME, fileName);
         return getStorage().delete(blobId);
+    }
+
+    public static boolean exists(String fileName) {
+        Blob blob = storage.get(BUCKET_NAME, fileName);
+        return blob != null;
     }
 }

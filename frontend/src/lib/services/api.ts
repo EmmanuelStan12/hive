@@ -49,17 +49,6 @@ const isTokenExpired = (token: string) => {
     return expirationTime <= currentTime;
 }
 
-// ============================== SAVE USER TO DB
-export async function saveUserToDB(user: {
-    accountId: string;
-    email: string;
-    name: string;
-    imageUrl: URL;
-    username?: string;
-}) {
-    return null
-}
-
 const setAuthLocalStorageProps = (user: IUser, token: string) => {
     LocalStorage.set("user", user)
     LocalStorage.set("token", token)
@@ -123,7 +112,8 @@ export async function getCurrentUser() {
 
 // ============================== SIGN OUT
 export async function signOutAccount() {
-    return null
+    LocalStorage.clear()
+    return
 }
 
 // ============================================================
@@ -277,7 +267,17 @@ export async function updatePost({ tags, caption, file, postId, location }: IUpd
 
 // ============================== DELETE POST
 export async function deletePost(postId?: number) {
-    return null
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.delete(`${BASE_URL}/posts/delete/${postId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+
+        return response.data
+    })
 }
 
 // ============================== LIKE / UNLIKE POST
@@ -285,7 +285,7 @@ export async function likePost(postId: number) {
     try {
         const token = LocalStorage.get("token") as string
 
-        const response = await axios.post(`${BASE_URL}/posts/like/${postId}`, {
+        const response = await axios.post(`${BASE_URL}/posts/like/${postId}`, null, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -295,8 +295,8 @@ export async function likePost(postId: number) {
 
         return post.data
     } catch (e) {
-        console.log(e)
         const err = (e as any).response.data as ApiErrorResponse
+        console.log(err || e)
         throw err
     }
 }
@@ -306,7 +306,7 @@ export async function savePost(postId: number) {
     try {
         const token = LocalStorage.get("token") as string
 
-        const response = await axios.post(`${BASE_URL}/posts/save/${postId}`, {
+        const response = await axios.post(`${BASE_URL}/posts/save/${postId}`, null, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -323,11 +323,25 @@ export async function savePost(postId: number) {
 }
 
 // ============================== DELETE SAVED POST
-export async function deleteSavedPost(savedRecordId: string) {
+export async function deleteSavedPost(savedRecordId: number) {
     return withTryCatch(async () => {
         const token = LocalStorage.get("token") as string
 
         const response = await axios.delete(`${BASE_URL}/posts/save/${savedRecordId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        })
+
+        return response.data
+    })
+}
+
+export async function deleteLikedPost(savedRecordId: number) {
+    return withTryCatch(async () => {
+        const token = LocalStorage.get("token") as string
+
+        const response = await axios.delete(`${BASE_URL}/posts/like/${savedRecordId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -342,7 +356,7 @@ export async function getUserPosts(userId?: string) {
     return withTryCatch(async () => {
         const token = LocalStorage.get("token") as string
 
-        const response = await axios.get(`${BASE_URL}/posts?userId=${userId}page=1&perPage=100`, {
+        const response = await axios.get(`${BASE_URL}/posts?userId=${userId}&page=1&perPage=100`, {
             headers: {
                 Authorization: `Bearer ${token}`
             },

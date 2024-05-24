@@ -6,7 +6,7 @@ import {
     useLikePost,
     useSavePost,
     useDeleteSavedPost,
-    useGetCurrentUser, useGetSavedPosts,
+    useGetCurrentUser, useGetSavedPosts, useDeleteLikedPost,
 } from "@/lib/react-query/queries";
 import { IPost, IUser } from "@/types";
 
@@ -25,6 +25,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     const { mutate: likePost } = useLikePost();
     const { mutate: savePost } = useSavePost();
     const { mutate: deleteSavePost } = useDeleteSavedPost();
+    const { mutate: deleteLikePost } = useDeleteLikedPost();
 
     const { data: currentUser } = useGetCurrentUser();
     const { data: savedPosts } = useGetSavedPosts();
@@ -44,12 +45,13 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
 
         if (likesArray.includes(userId)) {
             likesArray = likesArray.filter((Id) => Id !== userId);
+            deleteLikePost(post.id)
         } else {
             likesArray.push(userId);
+            likePost({ postId: post.id });
         }
 
         setLikes(likesArray);
-        likePost({ postId: post.id });
     };
 
     const handleSavePost = (

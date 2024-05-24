@@ -24,7 +24,7 @@ import {
     getInfinitePosts,
     searchPosts,
     savePost,
-    deleteSavedPost, getSavedPosts,
+    deleteSavedPost, getSavedPosts, deleteLikedPost,
 } from "@/lib/services/api";
 import {INewPost, INewUser, IUpdatePost, IUpdateUser} from "@/types";
 
@@ -179,6 +179,24 @@ export const useDeleteSavedPost = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (savedRecordId: number) => deleteSavedPost(savedRecordId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+            });
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_POSTS],
+            });
+            queryClient.invalidateQueries({
+                queryKey: [QUERY_KEYS.GET_CURRENT_USER],
+            });
+        },
+    });
+};
+
+export const useDeleteLikedPost = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (savedRecordId: number) => deleteLikedPost(savedRecordId),
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: [QUERY_KEYS.GET_RECENT_POSTS],

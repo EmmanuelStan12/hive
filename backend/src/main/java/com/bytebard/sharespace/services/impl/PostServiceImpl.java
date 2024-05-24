@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -69,19 +70,20 @@ public class PostServiceImpl implements PostService {
     public PostDTO updatePost(Long id, PostDTORequest updatePostDTO, MultipartFile file) throws IOException, NotFoundException {
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
 
-        Post updatedPost = MapperUtils.toPost(updatePostDTO);
-        updatedPost.setId(post.getId());
+        post.setCaption(updatePostDTO.getCaption());
+        post.setTags(updatePostDTO.getTags());
+        post.setLocation(updatePostDTO.getLocation());
 
         if (file != null) {
             fileUploadHelper.delete(post.getImageId());
             Pair<String, String> fileProps = fileUploadHelper.upload(file);
 
-            updatedPost.setImageId(fileProps.getKey());
-            updatedPost.setImageUrl(fileProps.getValue());
+            post.setImageId(fileProps.getKey());
+            post.setImageUrl(fileProps.getValue());
 
-            updatedPost = postRepository.save(post);
         }
-        return MapperUtils.toPostDTO(updatedPost);
+        post = postRepository.save(post);
+        return MapperUtils.toPostDTO(post);
     }
 
     @Override
@@ -100,20 +102,23 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDTO> getRecentPosts() {
         List<Post> posts = postRepository.findPopularPosts();
+        if (CollectionUtils.isEmpty(posts)) {
+            posts = postRepository.findAll("", PageRequest.of(0, 20));
+        }
 
         return posts.stream().map(post -> MapperUtils.toPostDTO(post, true, true)).toList();
     }
 
     @Override
     public List<PostDTO> getLikedPosts() {
-        List<Post> posts = postRepository.findSavedPosts(userService.getCurrentUser().getId());
+        List<Post> posts = postRepository.findLikedPosts(userService.getCurrentUser().getId());
 
         return posts.stream().map(MapperUtils::toPostDTO).toList();
     }
 
     @Override
     public List<PostDTO> getSavedPosts() {
-        List<Post> posts = postRepository.findLikedPosts(userService.getCurrentUser().getId());
+        List<Post> posts = postRepository.findSavedPosts(userService.getCurrentUser().getId());
 
         return posts.stream().map(MapperUtils::toPostDTO).toList();
     }

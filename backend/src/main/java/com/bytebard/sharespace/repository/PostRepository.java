@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("SELECT p FROM Post p WHERE p.tags LIKE CONCAT('%', :searchValue, '%') OR p.location LIKE CONCAT('%', :searchValue, '%') OR p.caption LIKE CONCAT('%', :searchValue, '%') ORDER BY p.createdAt")
+    @Query("SELECT p FROM Post p WHERE p.tags LIKE CONCAT('%', :searchValue, '%') OR p.location LIKE CONCAT('%', :searchValue, '%') OR p.caption LIKE CONCAT('%', :searchValue, '%') OR p.creator.name LIKE CONCAT('%', :searchValue, '%') OR p.creator.email LIKE CONCAT('%', :searchValue, '%') OR p.creator.bio LIKE CONCAT('%', :searchValue, '%') ORDER BY p.createdAt")
     List<Post> findAll(@Param("searchValue") String searchValue, Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.creator.id = :userId AND (p.tags LIKE CONCAT('%', :searchValue, '%') OR p.location LIKE CONCAT('%', :searchValue, '%') OR p.caption LIKE CONCAT('%', :searchValue, '%')) ORDER BY p.createdAt")

@@ -1,16 +1,13 @@
 package com.bytebard.sharespace.controllers;
 
-import com.bytebard.sharespace.config.security.JwtAuthenticationToken;
 import com.bytebard.sharespace.dtos.ApiResponse;
 import com.bytebard.sharespace.dtos.post.PostDTO;
 import com.bytebard.sharespace.dtos.post.PostDTORequest;
 import com.bytebard.sharespace.exceptions.NotFoundException;
-import com.bytebard.sharespace.models.User;
 import com.bytebard.sharespace.services.PostService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,7 +57,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostDTO>> updatePost(
             @PathVariable("id") Long postId,
             @Valid @RequestPart("post") PostDTORequest createPostDTO,
-            @RequestPart("file") MultipartFile file
+            @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException, NotFoundException {
         PostDTO postDTO = postService.updatePost(postId, createPostDTO, file);
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.OK.value(), null, postDTO), HttpStatus.OK);
